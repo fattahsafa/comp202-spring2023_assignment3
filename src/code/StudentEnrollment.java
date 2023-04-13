@@ -1,6 +1,7 @@
 package code;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import given.StudentInfo;
 
@@ -16,31 +17,36 @@ import given.StudentInfo;
  * 
  * 
  */
+
 public class StudentEnrollment {
 
   /*
    * ADD MORE FIELDS IF NEEDED
    * 
    */
+  BinarySearchTree<String, StudentInfo> studentNames;
+  BinarySearchTree<String, StudentInfo> studentNumbers;
 
   public StudentEnrollment() {
     /*
      * TO BE IMPLEMENTED
      * 
      */
+    studentNames = new BinarySearchTree<String, StudentInfo>();
+    studentNumbers = new BinarySearchTree<String, StudentInfo>();
   }
 
   // Returns the number of students in the Student Enrollment system
   public int size() {
-    return 0;
+    return studentNames.size();
   }
 
   // Returns true if the Student Enrollment system is empty, false otherwise
   public boolean isEmpty() {
-    return false;
+    return studentNames.isEmpty();
   }
 
-  //Adds a new student or overwrites an existing student with the given info
+  // Adds a new student or overwrites an existing student with the given info
   // Args should be given in the order of e-mail and address which is handled for
   // you
   // Note that it can also be empty. If you do not want to update a field pass
@@ -67,6 +73,11 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
+    StudentInfo student = new StudentInfo(name, number);
+    student.setEmail(email);
+    student.setAddress(address);
+    studentNames.put(name, student);
+    studentNumbers.put(number, student);
   }
 
   // Return the student info with the given name
@@ -77,7 +88,7 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
-    return null;
+    return studentNames.get(name);
   }
 
   // Return the student info with the given student number
@@ -88,7 +99,7 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
-    return null;
+    return studentNumbers.get(studentNumber);
 
   }
 
@@ -100,27 +111,47 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
+    List<BinaryTreeNode<String, StudentInfo>> elements = studentNames.getNodesInOrder();
+    for (BinaryTreeNode<String, StudentInfo> node : elements) {
+      if (node.getValue().getEmail() == null) {
+        continue;
+      }
+      if (node.getValue().getEmail().equals(email)) {
+        return node.getValue();
+      }
+    }
     return null;
-
   }
 
   // Removes the student with the given name
-  // Returns true if there is a student with the given name to delete, false otherwise
+  // Returns true if there is a student with the given name to delete, false
+  // otherwise
   public boolean removeByName(String name) {
     /*
      * TO BE IMPLEMENTED
      * 
      */
+    StudentInfo removed = studentNames.remove(name);
+    if (removed != null) {
+      removeByStudentNumber(removed.getNumber());
+      return true;
+    }
     return false;
   }
 
   // Removes the student with the given name
-  // Returns true if there is a student with the given number to delete, false otherwise
+  // Returns true if there is a student with the given number to delete, false
+  // otherwise
   public boolean removeByStudentNumber(String studentNumber) {
     /*
      * TO BE IMPLEMENTED
      * 
      */
+    StudentInfo removed = studentNumbers.remove(studentNumber);
+    if (removed != null) {
+      removeByName(removed.getName());
+      return true;
+    }
     return false;
   }
 
@@ -130,7 +161,8 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
-    return null;
+
+    return searchByName(name).getNumber();
   }
 
   // Returns the name associated with the number
@@ -139,26 +171,58 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
-    return null;
+    return searchByStudentNumber(number).getName();
   }
-  
+
   // Update the email of the student with the given name
-  // Returns true if there is a student with the given name to update, false otherwise
+  // Returns true if there is a student with the given name to update, false
+  // otherwise
   public boolean updateEmail(String name, String email) {
     /*
      * TO BE IMPLEMENTED
      * 
      */
+    StudentInfo toUpdate = searchByName(name);
+    if (toUpdate != null) {
+      // TODO Change later to replaceKey
+      toUpdate.setEmail(email);
+      replaceValue(name, toUpdate);
+      studentNumbers.put(toUpdate.getNumber(), toUpdate);
+      return true;
+    }
     return false;
   }
-  
+
+  private void replaceValue(String name, StudentInfo toUpdate) {
+    BinaryTreeNode<String, StudentInfo> location = studentNames.treeSearch(studentNames.getRoot(), name);
+
+    if (!studentNames.isExternal(location) && location.getValue() == toUpdate) {
+      location.setValue(toUpdate);
+    }
+
+    location = studentNumbers.treeSearch(studentNumbers.getRoot(), toUpdate.getNumber());
+
+    if (!studentNumbers.isExternal(location) && location.getValue() == toUpdate) {
+      location.setValue(toUpdate);
+    }
+
+  }
+
   // Update the address of the student with the given name
-  // Returns true if there is a student with the given name to update, false otherwise
+  // Returns true if there is a student with the given name to update, false
+  // otherwise
   public boolean updateAddress(String name, String address) {
     /*
      * TO BE IMPLEMENTED
      * 
      */
+    StudentInfo toUpdate = searchByName(name);
+    if (toUpdate != null) {
+      toUpdate.setAddress(address);
+      studentNames.put(name, toUpdate);
+      studentNumbers.put(toUpdate.getNumber(), toUpdate);
+      return true;
+    }
     return false;
   }
 
@@ -168,7 +232,12 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
-    return null;
+    List<BinaryTreeNode<String, StudentInfo>> nodes = studentNames.getNodesInOrder();
+    ArrayList<StudentInfo> students = new ArrayList<StudentInfo>();
+    for (BinaryTreeNode<String, StudentInfo> node : nodes) {
+      students.add(node.getValue());
+    }
+    return students;
   }
 
   // Prints the students in sorted order by name
@@ -177,5 +246,9 @@ public class StudentEnrollment {
      * TO BE IMPLEMENTED
      * 
      */
+    List<StudentInfo> students = getStudents();
+    for (StudentInfo contact : students) {
+      System.out.println(contact.toString());
+    }
   }
 }
